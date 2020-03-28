@@ -21,11 +21,11 @@
         </div>
       </div>
     </div>
-    <div class="row">
+    <!-- <div class="row">
       <div class="col-12">
         <a href>+ Add New Site</a>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
