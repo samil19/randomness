@@ -9,27 +9,21 @@
         class="col-xs-12 col-md-6 col-lg-4 col-xl-3 text-center mb-3"
         v-on:click="selectItem(item)"
       >
-        <div class="card card-block d-flex" style="width: 18rem; height: 15rem;">
+        <div id="mainCard" class="shadow-lg card card-block d-flex rounded-a">
           <div
-            class="card-body align-items-center d-flex justify-content-center"
+            class="card-body align-items-center d-flex justify-content-center rounded-a"
             v-bind:style="getColor(item)"
           >
             <!-- <img :src="item.logo" height="200px" width="300px" alt=""> -->
 
             <h3>{{item.name}}</h3>
           </div>
-          <!-- <div v-if="footer" class="card-footer text-muted">{{item[footer.atributo]}}</div> -->
         </div>
       </div>
-      <!-- <div class="col-sm-10 align-items-center d-flex justify-content-center mb-3">
-        <button class="btn btn-warning">
-          Add a new site?
-        </button>
-      </div>-->
     </div>
     <div class="row">
       <div class="col-12">
-        <a href="">+ Add New Site</a>
+        <a href>+ Add New Site</a>
       </div>
     </div>
   </div>
@@ -85,5 +79,12 @@ export default {
 <style>
 div {
   font-family: "Oswald", sans-serif;
+}
+.rounded-a {
+  border-radius: 4% !important;
+}
+#mainCard {
+  width: 18rem;
+  height: 15rem;
 }
 </style>

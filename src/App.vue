@@ -55,4 +55,9 @@ export default {
   color: black;
   text-align: center;
 }
+@media only screen and (min-width: 780px) {
+  .footer-site {
+  position: fixed;
+}
+}
 </style>
