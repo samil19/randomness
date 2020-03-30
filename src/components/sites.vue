@@ -4,7 +4,7 @@
       <div class="m-4 row text-center h-100">
         <!-- v-for="item in getData" :key="item.Id" -->
         <div
-          v-for="item in items"
+          v-for="item in getSites"
           :key="item.url"
           class="col-xs-12 col-md-6 col-lg-4 col-xl-3 text-center mb-3"
         >
@@ -50,6 +50,9 @@ export default {
       addingSite: false
     };
   },
+  created(){
+    this.$store.dispatch("getAllSites");
+  },
   mounted() {
     this.getData();
   },
@@ -85,6 +88,11 @@ export default {
     },
     toggleAddingSite(){
       this.addingSite = !this.addingSite;
+    }
+  },
+  computed:{
+    getSites(){
+      return this.$store.state.allSites;
     }
   }
 };

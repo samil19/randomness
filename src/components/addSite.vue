@@ -1,58 +1,82 @@
 <template>
-  <div>
-    <div class="row">
-      <div class="form-group col-xs-12 col-md-6 col-lg-3">
-        <ValidationProvider ref="allValidations" name="name" rules="required|alpha_num" v-slot="v">
-          <label for="Nombre">Name</label>
-          <input class="form-control col-12" name="Nombre" v-model="name" type="text" />
-          <span>{{ v.errors[0] }}</span>
-        </ValidationProvider>
-      </div>
-      <!-- Next Version -->
-      <!-- <div class="align-items-center col-xs-12 col-md-6 col-lg-3">
+  <div id="belowMe">
+    <ValidationObserver ref="observer" slim>
+      <div class="row">
+        <div class="col-xs-12 col-md-6 col-lg-3">
+          <ValidationProvider ref="nameVali" name="name" rules="required|alpha_num" v-slot="v">
+            <label for="Nombre">Name</label>
+            <input class="form-control col-12" name="Nombre" v-model="form.name" type="text" />
+            <span>{{ v.errors[0] }}</span>
+          </ValidationProvider>
+        </div>
+        <!-- Next Version -->
+        <!-- <div class="align-items-center col-xs-12 col-md-6 col-lg-3">
         <ValidationProvider name="name" rules="required" v-slot="v">
           <label for="logo">Logo</label>
           <input class="form-control col-12" name="logo" type="text" />
           <span>{{ v.errors[0] }}</span>
         </ValidationProvider>
-      </div>-->
-      <div class="align-items-center col-xs-12 col-md-6 col-lg-3">
-        <ValidationProvider name="Url" rules="url" v-slot="v">
-          <label for="url">Url</label>
-          <input class="form-control col-12" name="Url" v-model="form.url" type="text" />
-          <span>{{ v.errors[0] }}</span>
-        </ValidationProvider>
+        </div>-->
+        <div class="align-items-center col-xs-12 col-md-6 col-lg-3">
+          <ValidationProvider name="Url" ref="urlVali" rules="required|url" v-slot="v">
+            <label for="url">Url</label>
+            <input class="form-control col-12" name="Url" v-model="form.url" type="text" />
+            <span>{{ v.errors[0] }}</span>
+          </ValidationProvider>
+        </div>
+        <div class="align-items-center d-flex justify-content-center col-xs-12 col-md-6 col-lg-1">
+          <ValidationProvider name="Color" ref="colorVali" rules="required" v-slot="v" slim>
+            <div>
+              <label>Color</label>
+              <swatches v-model="form.color" colors="text-advanced"></swatches>
+              <span>{{ v.errors[0] }}</span>
+            </div>
+          </ValidationProvider>
+        </div>
+        <div class="align-items-center d-flex justify-content-center col-xs-12 col-md-6 col-lg-3">
+          <ValidationProvider name="Tags" ref="tagsVali" rules="required" v-slot="v">
+            <label>Tags</label>
+            <multiselect
+              v-model="form.tags"
+              tag-placeholder="Add this as new tag"
+              placeholder="Search or add a tag"
+              label="name"
+              track-by="name"
+              :options="tags"
+              :multiple="true"
+              :taggable="true"
+            ></multiselect>
+            <span>{{ v.errors[0] }}</span>
+          </ValidationProvider>
+        </div>
       </div>
-      <div class="align-items-center d-flex justify-content-center col-xs-12 col-md-6 col-lg-3">
-        <ValidationProvider name="Color" rules="required" v-slot="v">
-          <label>Color</label>
-          <swatches v-model="form.color" colors="text-advanced"></swatches>
-          <span>{{ v.errors[0] }}</span>
-        </ValidationProvider>
-      </div>
-      <div class="col-sm-12 align-items-center d-flex justify-content-center mt-3">
-        <button class="btn btn-success mr-3" v-on:click="add()">Save</button>
-        <button class="btn btn-primary" v-on:click="goBack()">Go back!</button>
-      </div>
-      <div class="col-sm-10 align-items-center d-flex justify-content-center mb-3">
-        <h4 v-if="message">{{message}}</h4>
-      </div>
+    </ValidationObserver>
+    <div class="col-sm-12 align-items-center d-flex justify-content-center mt-3">
+      <button class="btn btn-success mr-3" v-on:click="add()">Save</button>
+      <button class="btn btn-primary" v-on:click="goBack()">Go back!</button>
+    </div>
+    <div class="col-sm-10 align-items-center d-flex justify-content-center mb-3">
+      <h4 v-if="message">{{message}}</h4>
     </div>
   </div>
 </template>
 
 <script>
 import Swatches from "vue-swatches";
-import { ValidationProvider, validate } from "vee-validate";
+import { ValidationProvider, validate, ValidationObserver } from "vee-validate";
 import { extend } from "vee-validate";
 import { required, alpha_num, max } from "vee-validate/dist/rules";
 import { messages } from "vee-validate/dist/locale/en.json";
+import Multiselect from "vue-multiselect";
+const fb = require("../firebaseConfig.js");
 
 export default {
   name: "addSite",
   components: {
     ValidationProvider,
-    Swatches
+    Swatches,
+    ValidationObserver,
+    Multiselect
   },
   data() {
     return {
@@ -61,7 +85,9 @@ export default {
         color: "#1CA085",
         logo: "",
         name: "",
-        url: ""
+        url: "",
+        tags: [],
+        isItChecked: false
       },
       name: "",
       message: "",
@@ -73,6 +99,7 @@ export default {
         ".edu",
         ".gov",
         ".mil",
+        ".io",
         ".com.ac",
         ".edu.ac",
         ".gov.ac",
@@ -660,11 +687,247 @@ export default {
         ".firm.co",
         ".gov.co",
         ".info.co"
+      ],
+      tags: [
+        { name: "#love" },
+        { name: "#instagood" },
+        { name: "#photooftheday" },
+        { name: "#beautiful" },
+        { name: "#fashion" },
+        { name: "#tbt" },
+        { name: "#happy" },
+        { name: "#cute" },
+        { name: "#followme" },
+        { name: "#like4like" },
+        { name: "#follow" },
+        { name: "#me" },
+        { name: "#picoftheday" },
+        { name: "#selfie" },
+        { name: "#instadaily" },
+        { name: "#friends" },
+        { name: "#summer" },
+        { name: "#girl" },
+        { name: "#art" },
+        { name: "#fun" },
+        { name: "#repost" },
+        { name: "#smile" },
+        { name: "#nature" },
+        { name: "#instalike" },
+        { name: "#food" },
+        { name: "#style" },
+        { name: "#tagsforlikes" },
+        { name: "#family" },
+        { name: "#likeforlike" },
+        { name: "#igers" },
+        { name: "#fitness" },
+        { name: "#nofilter" },
+        { name: "#follow4follow" },
+        { name: "#instamood" },
+        { name: "#amazing" },
+        { name: "#life" },
+        { name: "#travel" },
+        { name: "#beauty" },
+        { name: "#vscocam" },
+        { name: "#sun" },
+        { name: "#bestoftheday" },
+        { name: "#music" },
+        { name: "#followforfollow" },
+        { name: "#beach" },
+        { name: "#instagram" },
+        { name: "#photo" },
+        { name: "#sky" },
+        { name: "#vsco" },
+        { name: "#dog" },
+        { name: "#l4l" },
+        { name: "#sunset" },
+        { name: "#f4f" },
+        { name: "#ootd" },
+        { name: "#pretty" },
+        { name: "#swag" },
+        { name: "#makeup" },
+        { name: "#foodporn" },
+        { name: "#hair" },
+        { name: "#cat" },
+        { name: "#party" },
+        { name: "#girls" },
+        { name: "#photography" },
+        { name: "#cool" },
+        { name: "#baby" },
+        { name: "#lol" },
+        { name: "#tflers" },
+        { name: "#model" },
+        { name: "#motivation" },
+        { name: "#night" },
+        { name: "#instapic" },
+        { name: "#funny" },
+        { name: "#gym" },
+        { name: "#healthy" },
+        { name: "#yummy" },
+        { name: "#hot" },
+        { name: "#design" },
+        { name: "#black" },
+        { name: "#pink" },
+        { name: "#flowers" },
+        { name: "#christmas" },
+        { name: "#blue" },
+        { name: "#work" },
+        { name: "#instafood" },
+        { name: "#fit" },
+        { name: "#instacool" },
+        { name: "#iphoneonly" },
+        { name: "#wedding" },
+        { name: "#blackandwhite" },
+        { name: "#workout" },
+        { name: "#lifestyle" },
+        { name: "#handmade" },
+        { name: "#followback" },
+        { name: "#instafollow" },
+        { name: "#home" },
+        { name: "#drawing" },
+        { name: "#my" },
+        { name: "#nyc" },
+        { name: "#webstagram" },
+        { name: "#sweet" },
+        { name: "#instalove" },
+        { name: "#gethealthy" },
+        { name: "#healthylife" },
+        { name: "#healthtalk" },
+        { name: "#eatclean" },
+        { name: "#fitfood" },
+        { name: "#nutrition" },
+        { name: "#fitquote" },
+        { name: "#fitnessmotivation" },
+        { name: "#fitspo" },
+        { name: "#getfit" },
+        { name: "#fitfam" },
+        { name: "#trainhard" },
+        { name: "#noexcuses" },
+        { name: "#fitnessaddict" },
+        { name: "#gymlife" },
+        { name: "#girlswholift" },
+        { name: "#workout" },
+        { name: "#fitlife" },
+        { name: "#gymlife" },
+        { name: "#sweat" },
+        { name: "#foodie" },
+        { name: "#foodporn" },
+        { name: "#foodgasm" },
+        { name: "#nom" },
+        { name: "#food" },
+        { name: "#pizza" },
+        { name: "#foodporn" },
+        { name: "#foodstagram" },
+        { name: "#menwhocook" },
+        { name: "#sushi" },
+        { name: "#yummy" },
+        { name: "#foodcoma" },
+        { name: "#eathealthy" },
+        { name: "#instafood" },
+        { name: "#delicious" },
+        { name: "#foodpic" },
+        { name: "#cooking" },
+        { name: "#snack" },
+        { name: "#tasty" },
+        { name: "#cleaneating" },
+        { name: "#travel" },
+        { name: "#instatravel" },
+        { name: "#travelgram" },
+        { name: "#tourist" },
+        { name: "#tourism" },
+        { name: "#vacation" },
+        { name: "#traveling" },
+        { name: "#travelblogger" },
+        { name: "#wanderlust" },
+        { name: "#ilovetravel" },
+        { name: "#instavacation" },
+        { name: "#traveldeeper" },
+        { name: "#getaway" },
+        { name: "#wanderer" },
+        { name: "#adventure" },
+        { name: "#travelphotography" },
+        { name: "#roadtrip" },
+        { name: "#mytravelgram" },
+        { name: "#igtravel" },
+        { name: "#traveler" },
+        { name: "#technology" },
+        { name: "#science" },
+        { name: "#bigdata" },
+        { name: "#iphone" },
+        { name: "#ios" },
+        { name: "#android" },
+        { name: "#mobile" },
+        { name: "#video" },
+        { name: "#design" },
+        { name: "#innovation" },
+        { name: "#startups" },
+        { name: "#tech" },
+        { name: "#cloud" },
+        { name: "#gadget" },
+        { name: "#instatech" },
+        { name: "#electronic" },
+        { name: "#device" },
+        { name: "#techtrends" },
+        { name: "#technews" },
+        { name: "#engineering" },
+        { name: "#fashion" },
+        { name: "#fashionista" },
+        { name: "#fashionblogger" },
+        { name: "#ootd" },
+        { name: "#style" },
+        { name: "#stylish" },
+        { name: "#streetstyle" },
+        { name: "#streetwear" },
+        { name: "#fashioninspo" },
+        { name: "#trend" },
+        { name: "#styleoftheday" },
+        { name: "#stylegram" },
+        { name: "#mensfashion" },
+        { name: "#lookbook" },
+        { name: "#todayiwore" },
+        { name: "#beauty" },
+        { name: "#makeupaddict" },
+        { name: "#hair" },
+        { name: "#instafashion" },
+        { name: "#vintage" },
+        { name: "#programming" },
+        { name: "#coding" },
+        { name: "#programmer" },
+        { name: "#developer" },
+        { name: "#code" },
+        { name: "#technology" },
+        { name: "#python" },
+        { name: "#coder" },
+        { name: "#javascript" },
+        { name: "#tech" },
+        { name: "#java" },
+        { name: "#computerscience" },
+        { name: "#software" },
+        { name: "#webdeveloper" },
+        { name: "#html" },
+        { name: "#linux" },
+        { name: "#css" },
+        { name: "#webdevelopment" },
+        { name: "#hacking" },
+        { name: "#development" },
+        { name: "#webdesign" },
+        { name: "#codinglife" },
+        { name: "#computer" },
+        { name: "#softwaredeveloper" },
+        { name: "#php" },
+        { name: "#hacker" },
+        { name: "#programmers" },
+        { name: "#programmingmemes" },
+        { name: "#softwareengineer" },
+        { name: "#bhfyp" }
       ]
     };
   },
   mounted() {
-    // No message specified.
+    //   WorkAround to error of VeeValidate
+    // document
+    //   .getElementById("belowMe")
+    //   .firstElementChild.setAttribute("class", "row");
+    //   document.getElementsByTagName("div")[1].setAttribute("class","row");
     extend("url", {
       validate: str => {
         var pattern = new RegExp(
@@ -676,7 +939,8 @@ export default {
             "(\\#[-a-z\\d_]*)?$",
           "i"
         ); // fragment locator
-        return !!pattern.test(str);
+        let result = !!pattern.test(str);
+        return result;
       },
       message: "This is not a valid url"
     });
@@ -697,39 +961,83 @@ export default {
   },
   methods: {
     async add() {
-      await this.validate();
+      const that = this;
+      const isItValid = await this.validate();
+      if (isItValid) {
+        const exist = this.chechkExist(); 
+        if(!exist){
+        that.form.collection = that.form.name.toLowerCase() + "Url";
+        fb.db
+          .collection("sites")
+          .add(that.form)
+          .then(() => {
+            that.resetForm();
+            that.message = "Thank You!";
+            that.$store.dispatch("getAllSites");
+          })
+          .catch(() => {
+            that.message = "Houston we had a problem!, Try Again!";
+          });
+        }else{
+          that.resetForm();
+          that.message = "This site already exist, but thank you!";
+        }
+      }
     },
     async validate() {
-      const valid = await this.$refs.allValidations.validate();
+      const valid = await this.$refs.observer.validate();
       let stopIndex = null;
       var that = this;
-      if (valid.valid) {
-      this.cleanUrl();
-      console.log("after " + this.form.url);
+      if (valid) {
+        this.cleanFirstCharactersUrl();
         await this.mainTLD.every((element, index) => {
-          if (that.form.url.indexOf(element) > -1) {
+          let result = that.form.url.indexOf(element) > -1;
+          if (result) {
             stopIndex = index;
             return false;
           }
+          return true;
         });
-
-        console.log(stopIndex);
+        if (stopIndex == null) {
+          this.message =
+            "Looks like this is not a valid url, is it .com, .net or other?";
+          return false;
+        } else {
+          this.cleanLastCharactersUrl(stopIndex);
+          return true;
+        }
         // const end = this.form.url.indexOf(".com") + 4;
+      } else {
+        return false;
       }
     },
-    cleanUrl(){
-      debugger
+    cleanFirstCharactersUrl() {
       const element = this.form.url;
-      const http =  element.indexOf("://");
-      const www =  element.indexOf("www.");
+      const http = element.indexOf("://");
+      const www = element.indexOf("www.");
 
-      if(www > -1){
-         this.form.url = element.substring(www, element.length);
-      }else if(http > -1){
-         this.form.url = element.substring(http, element.length);
-      }      
-      console.log("before " +  element);
+      if (www > -1) {
+        this.form.url = element.substring(www + 4, element.length + 1);
+      } else if (http > -1) {
+        this.form.url = element.substring(http + 3, element.length + 1);
+      }
+    },
+    cleanLastCharactersUrl(indexTLD) {
+      const tld = this.mainTLD[indexTLD];
+      const lengthTLD = tld.length;
+      const positionTLD = this.form.url.indexOf(tld);
 
+      this.form.url = this.form.url.substring(0, positionTLD + lengthTLD);
+    },
+    async chechkExist(){
+      var that = this;
+      const sites = this.$store.state.allSites;
+      await sites.forEach(element => {
+        if(element.url.indexOf(that.form.url) > -1){
+          return true;
+        }
+      });
+      return false;
     },
     resetForm() {
       this.form = {
@@ -743,13 +1051,20 @@ export default {
     goBack() {
       this.resetForm();
       this.$emit("toggleAddingSite");
+    },
+    addTag(newTag) {
+      const tag = {
+        name: newTag
+      };
+      this.form.tags.push(tag);
     }
   }
 };
 </script>
 
 <style>
-/* .vue-swatches__container{
-
-} */
+span {
+  width: inherit;
+}
 </style>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
