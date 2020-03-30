@@ -964,7 +964,8 @@ export default {
       const that = this;
       const isItValid = await this.validate();
       if (isItValid) {
-        const exist = this.chechkExist(); 
+        const exist = await this.chechkExist();
+        debugger;
         if(!exist){
         that.form.collection = that.form.name.toLowerCase() + "Url";
         fb.db

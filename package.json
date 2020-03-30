@@ -42,7 +42,7 @@
     "rules": {
       "no-unused-vars": 1,
       "no-debugger": 0,
-      "vue/no-unused-components":0
+      "vue/no-unused-components": 0
     }
   },
   "browserslist": [
