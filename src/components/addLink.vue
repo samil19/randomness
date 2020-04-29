@@ -14,7 +14,7 @@
       </div>
     </div>
     <massiveAdd
-      v-on:add="massiveAdding(value)"
+      v-on:add="massiveAdding"
       v-on:toggleMassiveAdd="toggleMassiveAdd()"
       :isMassiveAdd="isMassiveAdd"
       :message="message"
